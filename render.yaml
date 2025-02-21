@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: todo-list
+    env: go
+    buildCommand: go build -tags netgo -ldflags '-s -w' -o app
+    startCommand: ./app
+    envVars:
+      - key: GO_VERSION
+        value: 1.24
