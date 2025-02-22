@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"sort"
 	"sync"
 
 	"github.com/sonpnts/todo-list/models"
@@ -22,14 +23,33 @@ func CreateTask(task models.Task) int {
 	return task.ID
 }
 
-func GetTasks() []models.Task {
+func GetTasks(page, pageSize int) ([]models.Task, bool) {
 	mu.Lock()
 	defer mu.Unlock()
+
 	taskList := make([]models.Task, 0, len(tasks))
 	for _, task := range tasks {
 		taskList = append(taskList, task)
 	}
-	return taskList
+
+	sort.Slice(taskList, func(i, j int) bool {
+		return taskList[i].ID < taskList[j].ID
+	})
+
+	start := (page - 1) * pageSize
+	end := start + pageSize
+
+	if start >= len(taskList) {
+		return []models.Task{}, false
+	}
+
+	if end > len(taskList) {
+		end = len(taskList)
+	}
+
+	hasNextPage := end < len(taskList)
+
+	return taskList[start:end], hasNextPage
 }
 
 func UpdateTask(id int, completed bool) (models.Task, error) {
