@@ -9,9 +9,9 @@ func CreateTask(task models.Task) int {
 	return repository.CreateTask(task)
 }
 
-func GetTasks(page, pageSize int) ([]models.Task, bool) {
+func GetTasks(page, pageSize int) ([]models.Task, bool, error) {
 	tasks, hasNextPage := repository.GetTasks(page, pageSize)
-	return tasks, hasNextPage
+	return tasks, hasNextPage, nil
 }
 
 func UpdateTask(id int, completed bool) (models.Task, error) {
