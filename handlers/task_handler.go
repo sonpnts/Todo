@@ -21,27 +21,38 @@ func CreateTask(c *gin.Context) {
 }
 
 func GetTasks(c *gin.Context) {
-	page, err := strconv.Atoi(c.Query("page"))
-	if err != nil || page < 1 {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid page parameter",
-		})
-		return
+	query := c.Query("q")
+
+	var page int
+	var err error
+
+	if query != "" {
+		page = 1
+	} else {
+		page, err = strconv.Atoi(c.DefaultQuery("page", "1"))
+		if err != nil || page < 1 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page parameter"})
+			return
+		}
 	}
 
 	pageSize, err := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
 	if err != nil || pageSize < 1 {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid pageSize parameter",
-		})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid pageSize parameter"})
 		return
 	}
 
-	tasks, hasNextPage, err := services.GetTasks(page, pageSize)
+	var tasks []models.Task
+	var hasNextPage bool
+
+	if query != "" {
+		tasks, hasNextPage, err = services.SearchTasks(query, page, pageSize)
+	} else {
+		tasks, hasNextPage, err = services.GetTasks(page, pageSize)
+	}
+
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to retrieve tasks",
-		})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve tasks"})
 		return
 	}
 

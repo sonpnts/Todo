@@ -3,6 +3,7 @@ package repository
 import (
 	"errors"
 	"sort"
+	"strings"
 	"sync"
 
 	"github.com/sonpnts/todo-list/models"
@@ -50,6 +51,38 @@ func GetTasks(page, pageSize int) ([]models.Task, bool) {
 	hasNextPage := end < len(taskList)
 
 	return taskList[start:end], hasNextPage
+}
+
+func SearchTasks(query string, page, pageSize int) ([]models.Task, bool) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	var filteredTasks []models.Task
+	lowerQuery := strings.ToLower(query)
+
+	for _, task := range tasks {
+		if strings.Contains(strings.ToLower(task.Title), lowerQuery) {
+			filteredTasks = append(filteredTasks, task)
+		}
+	}
+
+	sort.Slice(filteredTasks, func(i, j int) bool {
+		return filteredTasks[i].ID < filteredTasks[j].ID
+	})
+
+	startIndex := (page - 1) * pageSize
+	endIndex := startIndex + pageSize
+
+	if startIndex >= len(filteredTasks) {
+		return []models.Task{}, false
+	}
+
+	if endIndex > len(filteredTasks) {
+		endIndex = len(filteredTasks)
+	}
+
+	hasNextPage := endIndex < len(filteredTasks)
+	return filteredTasks[startIndex:endIndex], hasNextPage
 }
 
 func UpdateTask(id int, completed bool) (models.Task, error) {

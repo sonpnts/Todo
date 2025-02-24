@@ -14,6 +14,11 @@ func GetTasks(page, pageSize int) ([]models.Task, bool, error) {
 	return tasks, hasNextPage, nil
 }
 
+func SearchTasks(query string, page, pageSize int) ([]models.Task, bool, error) {
+	tasks, hasNextPage := repository.SearchTasks(query, page, pageSize)
+	return tasks, hasNextPage, nil
+}
+
 func UpdateTask(id int, completed bool) (models.Task, error) {
 	return repository.UpdateTask(id, completed)
 }
