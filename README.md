@@ -11,8 +11,8 @@
 ## Cài đặt và chạy local
 ### 1. Clone repository
 ```bash
-git clone <repository-url>
-cd <project-folder>
+git clone https://github.com/sonpnts/Todo
+cd Todo
 ```
 
 ### 2. Cài đặt các dependencies
